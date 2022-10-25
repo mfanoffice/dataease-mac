@@ -1,55 +1,36 @@
 # dataease-mac
-Installation instruction:
-
-1. Install Docker first  
-   https://docs.docker.com/desktop/mac/install/
-  
-2. Unpack dataease-v1.6.2-offline.tar.gz  
-
-3. Replace install.sh under dataease-v1.6.2-offline  
-   Manually copy install.sh to folder dataease-v1.6.2-offline  
-
-4. Manually copy script envsubst to /usr/local/hobin  
-   and execute command  "chmod u+x envsubst" to give the exection permission  
-   * Notice: This is Perl script and is the option only when:  
-      a. You don't want to install addition package gettext  
-      b. There's trouble in gettext installtion (usually using the command 'brew install gettext', which is supposed to contain the command envsubst)  
-      c. It is to substitute the Linux command envsubst.     
-
-5. Edit install.conf  
-   DE_BASE=/Users/<homedir>  
-   DE_EXTERNAL_DORIS=true  
-   DE_EXTERNAL_KETTLE=true  
-
-6. Run install.sh  
-
-7. Visit http://localhost from browser  
-
------------------------------------------------------------
 
 安装说明：
-1. 首先安装Docker  
+1. Mac 系统中安装 Docker  
    下载地址： https://docs.docker.com/desktop/mac/install/  
+   
+2. 下载并解压 DataEase 安装包   
+   
+   2.1 下载 DataEase 最新版安装包（当前为 v1.15.3）
+       下载地址： https://community.fit2cloud.com/#/products/dataease/downloads  
+       * 注意：下载时需根据 MacBook 的芯片选择安装包
+          Inter 芯片：选择 “DataEase v1.15.3” 安装包；
+          Apple 芯片：选择 “DataEase v1.15.3 ARM64” 安装包。
+          
+   2.2 解压安装包
+         tar -zxvf dataease-v1.15.3-offline.tar.gz
+   
+3. 下载 dataease-mac.git 部署文件 
+   手动复制 dataease-mac 中的 install.sh 到解压目录 dataease-v1.15.3-offline 中，替换原有的 install.sh
 
-2. 解压dataease-v1.6.2-offline.tar.gz安装包  
-   下载地址： https://community.fit2cloud.com/#/products/dataease/downloads  
+4. 手动复制 envsubst 脚本到 /usr/local/bin/
+   并且执行 "sudo chmod u+x /usr/local/bin/envsubst" 赋予可执行权限  
 
-3. 替换dataease-v1.6.2-offline目录中的install.sh  
-   手动复制 install.sh 到 dataease-v1.6.2-offline 目录  
+   * 注意：这是 Perl 脚本，仅在以下情况下才可用：   
+   a. 你不想安装附件包 gettext  
+   b. gettext 安装有问题（通常使用 "brew install gettext" 命令，该命令应包含命令 envsubst）  
+   c. 它将替换 Linux 命令 envsubst  
 
-4. 手动复制envsubst脚本到/usr/local/hobin  
-   并且执行"chmod u+x envsubst"命令给与可执行权限  
+5. 编辑 install.conf  
+   DE_BASE=/Users/<UserDir>  
+  
 
-   * 注意：这是Perl脚本，仅在以下情况下才可用：   
-   a. 你不想安装附件包gettext  
-   b. gettext安装有问题（通常使用“brew install gettext”命令，该命令应包含命令envsubst）  
-   c. 它将替换Linux命令envsubst  
-
-5. 编辑install.conf  
-   DE_BASE=/Users/<homedir>  
-   DE_EXTERNAL_DORIS=true  
-   DE_EXTERNAL_KETTLE=true  
-
-6. 执行 install.sh  
-
+6. 执行安装  
+   进入到解压目录，执行 sudo ./install.sh
+   
 7. 在浏览器访问 http://localhost  
