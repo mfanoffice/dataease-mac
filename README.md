@@ -27,7 +27,7 @@
    c. 它将替换 Linux 命令 envsubst  
 
 5. 编辑 install.conf  
-   DE_BASE=/Users/<UserDir>  
+   DE_BASE=/Users/User_Dir  #更换为自己的用户目录
   
 
 6. 执行安装  
