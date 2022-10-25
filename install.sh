@@ -25,7 +25,7 @@ compose_files="-f docker-compose.yml"
 
 if [ -f /usr/local/bin/dectl ]; then
    # 获取已安装的 DataEase 的运行目录
-   DE_BASE=`grep "^DE_BASE=" /usr/local/bin/dectl | cut -d'=' -f2`
+   DE_BASE=`grep "^DE_BASE=" /usr/bin/dectl | cut -d'=' -f2`
    dectl uninstall
 fi
 
@@ -51,6 +51,33 @@ function prop {
    [ -f "$1" ] | grep -P "^\s*[^#]?${2}=.*$" $1 | cut -d'=' -f2
 }
 
+if [ "x${DE_ENGINE_MODE}" = "x" ]; then
+   export DE_ENGINE_MODE="local"
+fi
+
+if [ "x${DE_DOCKER_SUBNET}" = "x" ]; then
+   export DE_DOCKER_SUBNET=`grep "^[[:blank:]]*- subnet" ${DE_RUN_BASE}/docker-compose.yml | awk -F': ' '{print $2}'`
+fi
+
+if [ "x${DE_DOCKER_GATEWAY}" = "x" ]; then
+   export DE_DOCKER_GATEWAY=`grep "^[[:blank:]]*gateway" ${DE_RUN_BASE}/docker-compose.yml | awk -F': ' '{print $2}'`
+fi
+
+if [ "x${DE_DORIS_FE_IP}" = "x" ]; then
+   DE_DORIS_FE_IP=`grep "^[[:blank:]]*ipv4_address" ${DE_RUN_BASE}/docker-compose-doris.yml | awk -F': ' '{print $2}' | head -n 1`
+   export DE_DORIS_FE_IP
+fi
+
+if [ "x${DE_DORIS_BE_IP}" = "x" ]; then
+   DE_DORIS_BE_IP=`grep "^[[:blank:]]*ipv4_address" ${DE_RUN_BASE}/docker-compose-doris.yml | awk -F': ' '{print $2}' | tail -n 1`
+   export DE_DORIS_BE_IP
+fi
+
+echo -e "*******************************************************\n" 2>&1 | tee -a ${CURRENT_DIR}/install.log
+echo -e " 当前部署模式为 ${DE_ENGINE_MODE}，如需切换模式，\n 请修改 $DE_BASE/dataease/.env 中的 DE_ENGINE_MODE 变量后，\n 重新执行 bash install.sh 即可\n" 2>&1 | tee -a ${CURRENT_DIR}/install.log
+echo -e "*******************************************************\n" 2>&1 | tee -a ${CURRENT_DIR}/install.log
+
+
 if [[ -f $dataease_conf ]] && [[ ! ${DE_EXTERNAL_DORIS} ]]; then
    export DE_DORIS_DB=$(prop $dataease_conf doris.db)
    export DE_DORIS_USER=$(prop $dataease_conf doris.user)
@@ -66,7 +93,7 @@ if [[ -f $dataease_conf ]] && [[ ! ${DE_EXTERNAL_DORIS} ]]; then
    fi
 fi
 
-if [ ${DE_EXTERNAL_DORIS} = "false" ]; then
+if [ ${DE_EXTERNAL_DORIS} = "false" ] && [ ${DE_ENGINE_MODE} = "local" ]; then
    compose_files="${compose_files} -f docker-compose-doris.yml"
 fi
 
@@ -83,7 +110,7 @@ if [[ -f $dataease_conf ]] && [[ ! ${DE_EXTERNAL_KETTLE} ]]; then
    fi
 fi
 
-if [ ${DE_EXTERNAL_KETTLE} = "false" ]; then
+if [ ${DE_EXTERNAL_KETTLE} = "false" ] && [ ${DE_ENGINE_MODE} = "local" ]; then
    compose_files="${compose_files} -f docker-compose-kettle.yml"
 fi
 
@@ -94,14 +121,19 @@ mkdir -p ${DE_RUN_BASE}
 cp -r ./dataease/* ${DE_RUN_BASE}/
 
 cd $DE_RUN_BASE
-set | grep DE_ >.env
+env | grep DE_ >.env
 
 mkdir -p $conf_folder
 mkdir -p ${DE_RUN_BASE}/data/kettle
+chmod -R 777 ${DE_RUN_BASE}/data
 mkdir -p ${DE_RUN_BASE}/data/fe
 mkdir -p ${DE_RUN_BASE}/data/be
 mkdir -p ${DE_RUN_BASE}/data/mysql
-
+chmod -R 777 ${DE_RUN_BASE}/data/mysql
+mkdir -p ${DE_RUN_BASE}/data/static-resource
+mkdir -p ${DE_RUN_BASE}/custom-drivers
+mkdir -p ${DE_RUN_BASE}/data/business
+chmod -R 777 ${DE_RUN_BASE}/logs
 DE_MYSQL_HOST_ORIGIN=$DE_MYSQL_HOST
 DE_MYSQL_PORT_ORIGIN=$DE_MYSQL_PORT
 
@@ -147,19 +179,18 @@ cd ${CURRENT_DIR}
 if [[ -d images ]]; then
    log "加载镜像"
    for i in $(ls images); do
-      image_name=`echo $i | awk -F: '{print $1}'`
-      if [[ $image_name = "dataease" ]] || [[ $image_name = "mysql" ]];then
-         docker load -i images/$i 2>&1 | tee -a ${CURRENT_DIR}/install.log
+      if [ ${DE_ENGINE_MODE} != "local" ]; then
+         if [[ $i =~ "doris" ]] || [[ $i =~ "kettle" ]]; then
+            continue
+         fi
       fi
+      docker load -i images/$i 2>&1 | tee -a ${CURRENT_DIR}/install.log
    done
 else
    log "拉取镜像"
    cd ${DE_RUN_BASE} && docker-compose $compose_files pull 2>&1
    cd -
 fi
-
-
-
 
 http_code=`curl -sILw "%{http_code}\n" http://localhost:${DE_PORT} -o /dev/null`
 if [[ $http_code == 200 ]];then
