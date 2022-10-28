@@ -125,12 +125,12 @@ env | grep DE_ >.env
 
 mkdir -p $conf_folder
 mkdir -p ${DE_RUN_BASE}/data/kettle
-chmod -R 777 ${DE_RUN_BASE}/data
+
 mkdir -p ${DE_RUN_BASE}/data/fe
 mkdir -p ${DE_RUN_BASE}/data/be
 mkdir -p ${DE_RUN_BASE}/data/mysql
-chmod -R 777 ${DE_RUN_BASE}/data/mysql
 mkdir -p ${DE_RUN_BASE}/data/static-resource
+chmod -R 777 ${DE_RUN_BASE}/data
 mkdir -p ${DE_RUN_BASE}/custom-drivers
 mkdir -p ${DE_RUN_BASE}/data/business
 chmod -R 777 ${DE_RUN_BASE}/logs
