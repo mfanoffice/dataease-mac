@@ -50,7 +50,8 @@
 
 6. 执行安装  
 
-         进入到解压目录，执行 sudo ./install.sh
+         进入到解压目录，执行 
+         sudo chmod +x install.sh && sudo ./install.sh
       
    
 7. 在浏览器访问 http://localhost  
