@@ -1,5 +1,12 @@
 #!/bin/bash
 
+if [ ! -f "/usr/local/bin/envsubst" ]; then
+        echo '#!/usr/bin/perl -p' >> /usr/local/bin/envsubst
+        echo '$_ =~ s/\Q${$1||$2}/$ENV{$1?$2:$4}/ while $_ =~ /(\$\{([^}]+)})|(\$(\w+))/g;' >> /usr/local/bin/envsubst
+        chmod a+x /usr/local/bin/envsubst
+fi
+
+
 CURRENT_DIR=$(
    cd "$(dirname "$0")"
    pwd
