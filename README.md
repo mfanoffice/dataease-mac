@@ -32,7 +32,6 @@
       
          DE_BASE=/Users/User_Dir  #更换为自己的用户目录
          
-         DE_ENGINE_MODE=simple 或 local #按需更改
   
 
 5. 执行安装  
